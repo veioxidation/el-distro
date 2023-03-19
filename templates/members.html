@@ -1,0 +1,91 @@
+<!-- members.html -->
+
+<h1>Members</h1>
+
+<!-- Member list -->
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Name</th>
+      <th>Email</th>
+      <th>Skills</th>
+      <th>Capacity</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for member in members %}
+      <tr>
+        <td>{{ member.id }}</td>
+        <td>{{ member.name }}</td>
+        <td>{{ member.email }}</td>
+        <td>{{ member.skills }}</td>
+        <td>{{ member.capacity }}</td>
+        <td>
+          <button class="remove-member-btn" data-member-id="{{ member.id }}">Remove</button>
+        </td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<!-- Add member form -->
+<h2>Create New Member</h2>
+<form id="create-member-form">
+  <label>Name:</label><br>
+  <input type="text" name="name"><br>
+  <label>Email:</label><br>
+  <input type="email" name="email"><br>
+  <label>Skills:</label><br>
+  <input type="text" name="skills"><br>
+  <label>Capacity:</label><br>
+  <input type="number" name="capacity"><br>
+  <button type="submit">Create Member</button>
+</form>
+<p id="create-member-message"></p>
+
+<script>
+  const createMemberForm = document.querySelector('#create-member-form');
+  const createMemberMessage = document.querySelector('#create-member-message');
+  const removeMemberButtons = document.querySelectorAll('.remove-member-btn');
+
+  // Event listener for submitting the create member form
+  createMemberForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+
+    const formData = new FormData(createMemberForm);
+    const name = formData.get('name');
+    const email = formData.get('email');
+    const skills = formData.get('skills');
+    const capacity = formData.get('capacity');
+
+    const response = await fetch('/members', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email, skills, capacity })
+    });
+
+    if (response.ok) {
+      createMemberMessage.textContent = 'Member created successfully';
+      createMemberForm.reset();
+    } else {
+      createMemberMessage.textContent = 'Error creating member';
+    }
+  });
+
+  // Event listener for clicking the remove member button
+  removeMemberButtons.forEach((button) => {
+    button.addEventListener('click', async () => {
+      const memberId = button.dataset.memberId;
+
+      const response = await fetch(`/members/${memberId}`, {
+        method: 'DELETE'
+      });
+
+      if (response.ok) {
+        button.closest('tr').remove();
+      }
+    });
+  });
+</script>
