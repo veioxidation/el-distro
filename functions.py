@@ -3,13 +3,11 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.exc import IntegrityError
 
 # Create a session factory for connecting to the database
-from data_models.Assignment import Assignment
-from data_models.Project import Project
-from data_models.Member import Member
 from create_engine import db
 
 import datetime
 
+from models.models import Assignment, Project, Member
 
 Session = sessionmaker(bind=db)
 

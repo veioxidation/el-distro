@@ -1,9 +1,9 @@
 import unittest
 
 from create_engine import db
-from data_models.Assignment import Assignment
-from data_models.Member import Member
-from data_models.Project import Project
+from models.Assignment import Assignment
+from models.Member import Member
+from models.Project import Project
 
 
 class TestDatabase(unittest.TestCase):
