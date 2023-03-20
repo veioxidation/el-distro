@@ -22,9 +22,8 @@ def assign_member_to_project(session, member_id, project_id, capacity):
         else:
             # Create a new assignment for the member and project
             assignment = Assignment(member_id=member_id, project_id=project_id, capacity=capacity)
-            # TODO: Capacity Check
             session.add(assignment)
-        session.commit()
+            session.commit()
         return assignment
     except IntegrityError:
         # Handle any database errors that may occur
@@ -68,6 +67,7 @@ def check_project_assignments(session, project_id):
 
     """
     try:
+        # TODO -> Assignments should be timed.
         # Get the project and its assignments
         project = session.query(Project).get(project_id)
         assignments = project.assignments
