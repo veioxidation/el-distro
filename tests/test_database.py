@@ -43,7 +43,7 @@ class TestDatabase(unittest.TestCase):
 
         # check that the member's name was updated in the database
         self.assertIsNotNone(session.query(Member).filter_by(name='Jane Doe').first())
-        # Member.remove_by_id(session, member.id)
+        Member.remove_by_id(session, member.id)
 
     def test_skills(self):
         skills_names = ['Python', 'AA', 'Kofax']

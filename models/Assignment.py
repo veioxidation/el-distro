@@ -25,3 +25,16 @@ class Assignment(CoreModel):
 
     def change_member(self, new_member):
         self.capacity = new_member
+
+    @classmethod
+    def query_by_project_id(cls, s, project_id):
+        return s.query(cls).filter_by(project_id=project_id).all()
+
+    @classmethod
+    def query_by_member_id(cls, s, member_id):
+        return s.query(cls).filter_by(member_id=member_id).all()
+
+    @classmethod
+    def query_by_member_and_project_id(cls, s, project_id, member_id):
+        return s.query(cls).filter_by(project_id=project_id,
+                                      member_id=member_id).all()

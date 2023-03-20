@@ -30,3 +30,6 @@ class Project(CoreModel):
 
     def get_timelines(self):
         return self.start_date, self.due_date
+
+    def get_assignemnts(self):
+        return self.assignments

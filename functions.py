@@ -37,24 +37,10 @@ def unassign_member_from_project(session, member_id, project_id):
         # Delete the assignment for the member and project
         session.query(Assignment).filter_by(member_id=member_id, project_id=project_id).delete()
         session.commit()
-
     except IntegrityError:
         # Handle any database errors that may occur
         session.rollback()
         raise ValueError('Invalid member or project ID')
-
-
-def change_assignment_capacity(session, project_id, member_id, new_capacity):
-    try:
-        assignment = session.query(Assignment).filter_by(project_id=project_id, member_id=member_id).first()
-        if not assignment:
-            raise ValueError(f"No assignment found for project id {project_id} and member id {member_id}")
-        assignment.capacity = new_capacity
-        session.commit()
-    except IntegrityError:
-        # Handle any database errors that may occur
-        session.rollback()
-        raise ValueError('Wrong Values')
 
 
 def check_project_assignments(session, project_id):
