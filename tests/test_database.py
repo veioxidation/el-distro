@@ -1,65 +1,72 @@
 import unittest
 
-from create_engine import db
 from models.Assignment import Assignment
 from models.Member import Member
 from models.Project import Project
+from models.Skillset import Skillset
+from models.db import Session
+
+session = Session()
 
 
 class TestDatabase(unittest.TestCase):
     def test_create_member(self):
         # create a new member
-        member = Member(name='John Doe')
-        db.session.add(member)
-        db.session.commit()
+        _name = 'Test Member'
+        member = Member(name=_name, capacity=100)
+        session.add(member)
+        session.commit()
 
         # check that the member was added to the database
-        assert Member.query.filter_by(name='John Doe').first() is not None
+        assert session.query(Member).filter_by(name=_name).first() is not None
+        Member.remove_by_id(session, member.id)
+
+    def test_create_member_2(self):
+        # create a new member
+        _name = 'Test Member 2'
+        member = Member.add(session, name=_name, capacity=100)
+
+        # check that the member was added to the database
+        self.assertIsNotNone(session.query(Member).filter_by(name=_name).first())
+        Member.remove_by_id(session, member.id)
 
     def test_update_member(self):
         # create a new member
-        member = Member(name='John Doe')
-        db.session.add(member)
-        db.session.commit()
+        member = Member(name='Przemek', capacity=100)
+        session.add(member)
+        session.commit()
 
         # update the member's name
         member.name = 'Jane Doe'
-        db.session.commit()
+        member.email = 'random@email.com'
+        session.commit()
 
         # check that the member's name was updated in the database
-        assert Member.query.filter_by(name='Jane Doe').first() is not None
+        self.assertIsNotNone(session.query(Member).filter_by(name='Jane Doe').first())
+        # Member.remove_by_id(session, member.id)
 
-    # def test_delete_member(self):
-    #     # create a new member
-    #     member = Member(name='John Doe')
-    #     db.session.add(member)
-    #     db.session.commit()
-    #
-    #     # delete the member
-    #     db.session.delete(member)
-    #     db.session.commit()
-    #
-    #     # check that the member was deleted from the database
-    #     assert Member.query.filter_by(name='John Doe').first() is None
+    def test_skills(self):
+        skills_names = ['Python', 'AA', 'Kofax']
+        skills = [Skillset.add(session, name=x) for x in skills_names]
+        member = Member.add(session, name='Przemked', skillsets=skills, capacity=100)
+        self.assertEqual(len(skills), 3)
+        Member.remove_by_id(session, member.id)
 
-    # def test_create_assignment(self):
-    #     # create a new member
-    #     member = Member(name='John Doe')
-    #     db.session.add(member)
-    #     db.session.commit()
-    #
-    #     # create a new project
-    #     project = Project(name='Project A', estimated_effort=5, skill='Python')
-    #     db.session.add(project)
-    #     db.session.commit()
-    #
-    #     # assign the member to the project
-    #     assignment = Assignment(member_id=member.id, project_id=project.id, capacity=4)
-    #     db.session.add(assignment)
-    #     db.session.commit()
-    #
-    #     # check that the assignment was added to the database
-    #     assert Assignment.query.filter_by(member_id=member.id, project_id=project.id).first() is not None
+
+
+    def test_project_assignment(self):
+        ss1 = Skillset.add(session, name='Python')
+        ss2 = Skillset.add(session, name='AA')
+        m = Member(name='Przemek', capacity=100, skillsets = [ss1, ss2])
+        p = Project(name='Project 1')
+        a = Assignment(capacity=100, member_id=m.id, project_id=p.id)
+
+        session.add(m)
+        session.add(p)
+        session.add(a)
+        session.commit()
+        Member.remove_by_id(session, m.id)
+        Project.remove_by_id(session, p.id)
 
 
 if __name__ == '__main__':

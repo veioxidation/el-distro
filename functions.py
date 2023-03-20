@@ -1,74 +1,72 @@
+import datetime
+
 from sqlalchemy import func
-from sqlalchemy.orm import sessionmaker
 from sqlalchemy.exc import IntegrityError
 
 # Create a session factory for connecting to the database
-from create_engine import db
-
-import datetime
-
-from models.models import Assignment, Project, Member
-
-Session = sessionmaker(bind=db)
-
-
+from models.Assignment import Assignment
+from models.Member import Member
+from models.Project import Project
 # Assign a member to a project, taking into consideration existing assignments
-def assign_member_to_project(member_id, project_id, capacity):
-    session = Session()
+from models.Skillset import Skillset
+from models.db import Session
+
+
+def assign_member_to_project(session, member_id, project_id, capacity):
     try:
         # Check if the member is already assigned to the project
-        existing_assignment = session.query(Assignment).filter_by(member_id=member_id, project_id=project_id).first()
-        if existing_assignment:
+        assignment = session.query(Assignment).filter_by(member_id=member_id, project_id=project_id).first()
+        if assignment:
             # Update the existing assignment's capacity
-            existing_assignment.capacity = capacity
+            assignment.capacity = capacity
         else:
             # Create a new assignment for the member and project
             assignment = Assignment(member_id=member_id, project_id=project_id, capacity=capacity)
+            # TODO: Capacity Check
             session.add(assignment)
-        session.commit()
-    except IntegrityError:
-        # Handle any database errors that may occur
-        session.rollback()
-        raise ValueError('Invalid member or project ID')
-    finally:
-        session.close()
-
-
-# Unassign a member from a project
-def unassign_member_from_project(member_id, project_id):
-    session = Session()
-    try:
-        # Delete the assignment for the member and project
-        session.query(Assignment).filter_by(member_id=member_id, project_id=project_id).delete()
-        session.commit()
-    except IntegrityError:
-        # Handle any database errors that may occur
-        session.rollback()
-        raise ValueError('Invalid member or project ID')
-    finally:
-        session.close()
-
-
-def change_assignment_capacity(project_id, member_id, new_capacity):
-    session = Session()
-    try:
-        assignment = session.query(Assignment).filter_by(project_id=project_id, member_id=member_id).first()
-        if not assignment:
-            raise ValueError(f"No assignment found for project id {project_id} and member id {member_id}")
-        assignment.capacity_level = new_capacity
         session.commit()
         return assignment
     except IntegrityError:
         # Handle any database errors that may occur
         session.rollback()
+        raise ValueError('Invalid member or project ID')
+
+
+# Unassign a member from a project
+def unassign_member_from_project(session, member_id, project_id):
+    try:
+        # Delete the assignment for the member and project
+        session.query(Assignment).filter_by(member_id=member_id, project_id=project_id).delete()
+        session.commit()
+
+    except IntegrityError:
+        # Handle any database errors that may occur
+        session.rollback()
+        raise ValueError('Invalid member or project ID')
+
+
+def change_assignment_capacity(session, project_id, member_id, new_capacity):
+    try:
+        assignment = session.query(Assignment).filter_by(project_id=project_id, member_id=member_id).first()
+        if not assignment:
+            raise ValueError(f"No assignment found for project id {project_id} and member id {member_id}")
+        assignment.capacity = new_capacity
+        session.commit()
+    except IntegrityError:
+        # Handle any database errors that may occur
+        session.rollback()
         raise ValueError('Wrong Values')
-    finally:
-        session.close()
 
 
-# Check if the assignments for a project are sufficient to deliver the project
-def check_project_assignments(project_id):
-    session = Session()
+def check_project_assignments(session, project_id):
+    """
+    # Check if the assignments for a project are sufficient to deliver the project
+    Args:
+        project_id: Look at the project timelines and assignments and say if this is enough.
+
+    Returns:
+
+    """
     try:
         # Get the project and its assignments
         project = session.query(Project).get(project_id)
@@ -83,8 +81,6 @@ def check_project_assignments(project_id):
         # Handle any database errors that may occur
         session.rollback()
         raise ValueError('Invalid project ID')
-    finally:
-        session.close()
 
 
 # Calculate the due date for a project
@@ -162,11 +158,12 @@ def get_assignments_for_project(project_id):
         session.close()
 
 
-
 def add_new_member(name, email, skills, capacity):
     session = Session()
     try:
-        m = Member(name=name, email=email, skills=skills, capacity=capacity)
+        skill_list = [Skillset(name=x) for x in skills.split(",")]
+        [session.add(skill) for skill in skill_list]
+        m = Member(name=name, email=email, skillsets=skill_list, capacity=capacity)
         session.add(m)
         session.commit()
     except IntegrityError:

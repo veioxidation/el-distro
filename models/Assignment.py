@@ -1,0 +1,27 @@
+from sqlalchemy import Column, Integer, ForeignKey
+from sqlalchemy.orm import relationship
+
+from config import SCHEMA_NAME
+from models.CoreModel import CoreModel
+
+
+class Assignment(CoreModel):
+    __tablename__ = 'assignments'
+    __table_args__ = {'schema': SCHEMA_NAME}
+
+    id = Column(Integer, primary_key=True)
+    capacity = Column(Integer, nullable=False)
+
+    # Define the many-to-one relationship with members
+    member_id = Column(Integer, ForeignKey(f'members.id', ondelete='cascade'))
+    member = relationship('Member', back_populates=f'assignments')
+
+    # Define the many-to-one relationship with projects
+    project_id = Column(Integer, ForeignKey(f'projects.id', ondelete='cascade'))
+    project = relationship('Project', back_populates=f'assignments')
+
+    def change_capacity(self, new_capacity):
+        self.capacity = new_capacity
+
+    def change_member(self, new_member):
+        self.capacity = new_member

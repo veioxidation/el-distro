@@ -4,6 +4,7 @@ from create_engine import DB_URI
 from functions import *
 
 # from flask_sqlalchemy import SQLAlchemy
+from models.Project import Project
 
 app = Flask(__name__)
 
