@@ -15,7 +15,9 @@ class AssignmentFunctions(unittest.TestCase):
 
     def test_assigning(self):
         with Session() as s:
-            m = Member.add(s, name='Przemek', capacity=100)
+            start_capacity = 100
+
+            m = Member.add(s, name='Przemek', capacity=start_capacity)
             p = Project.add(s, name='wasting my life', effort_estimate=100)
             m_id = m.id
             p_id = p.id
@@ -23,7 +25,7 @@ class AssignmentFunctions(unittest.TestCase):
             # Assign user to a project
             a = assign_member_to_project(s, m_id, p_id, 60)
 
-            self.assertEqual(m.get_full_capacity(), 100)
+            self.assertEqual(m.get_full_capacity(), start_capacity)
             self.assertEqual(m.get_free_capacity(), 40)
 
             # Change capacity to 20
@@ -41,8 +43,9 @@ class AssignmentFunctions(unittest.TestCase):
 
     def test_assignment_capacity(self):
         with Session() as s:
-            m = Member.add(s, name='Przemek', capacity=100)
-            m2 = Member.add(s, name='Aarif', capacity=100)
+            start_capacity = 100
+            m = Member.add(s, name='Przemek', capacity=start_capacity)
+            m2 = Member.add(s, name='Aarif', capacity=start_capacity)
             p = Project.add(s, name='wasting my life', effort_estimate=100)
             m_id = m.id
             m2_id = m2.id
@@ -64,8 +67,10 @@ class AssignmentFunctions(unittest.TestCase):
 
     def test_timeline_calculation(self):
         with Session() as s:
-            m = Member.add(s, name='Przemek', capacity=100)
-            m2 = Member.add(s, name='Aarif', capacity=100)
+            start_capacity = 100
+
+            m = Member.add(s, name='Przemek', capacity=start_capacity)
+            m2 = Member.add(s, name='Aarif', capacity=start_capacity)
             p = Project.add(s, name='wasting my life', effort_estimate=20)
             m_id = m.id
             m2_id = m2.id
