@@ -26,7 +26,7 @@ class AssignmentFunctions(unittest.TestCase):
             a = assign_member_to_project(s, m_id, p_id, 60)
 
             self.assertEqual(m.get_full_capacity(), start_capacity)
-            self.assertEqual(m.get_free_capacity(), 40)
+            self.assertEqual(m.get_free_capacity(), start_capacity - 60)
 
             # Change capacity to 20
             a.capacity = 20
