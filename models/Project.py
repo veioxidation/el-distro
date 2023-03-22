@@ -1,19 +1,34 @@
-from sqlalchemy import Column, Integer, String, Date
+import enum
+from datetime import datetime
+
+from sqlalchemy import Column, Integer, String, Date, Enum
 from sqlalchemy.orm import relationship
 
 from config import SCHEMA_NAME
 from models.CoreModel import CoreModel
 
 
+class ProjectStatusEnum(enum.Enum):
+    backlog = enum.auto()
+    in_analysis = enum.auto()
+    in_progress = enum.auto()
+    in_testing = enum.auto()
+    live = enum.auto()
+
+
 class Project(CoreModel):
     __tablename__ = 'projects'
     __table_args__ = {'schema': SCHEMA_NAME}
+    __mapper_args__ = {"exclude_properties": ["uploaded"]}
 
     id = Column(Integer, primary_key=True)
     name = Column(String(50), nullable=False)
     effort_estimate = Column(Integer, nullable=True)
     start_date = Column(Date, nullable=True)
     due_date = Column(Date, nullable=True)
+
+    progress = Column(Integer, nullable=False, default=0)
+    status = Column(Enum(ProjectStatusEnum), default=ProjectStatusEnum.backlog)
 
     # Define the many-to-one relationship with skill sets
     # skillset_id = Column(Integer, ForeignKey(f'skillsets.id'))
@@ -33,3 +48,16 @@ class Project(CoreModel):
 
     def get_assignemnts(self):
         return self.assignments
+
+    def get_progress(self):
+        return self.progress
+
+    def set_progress(self):
+        return self.progress
+
+    def start_today(self):
+        self.start_date = datetime.today()
+
+    @classmethod
+    def query_by_name(cls, s, **kwargs):
+        return s.query(cls).filter_by(name=kwargs['name']).first()

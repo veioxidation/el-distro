@@ -51,4 +51,4 @@ class CoreModel(Base):
         s.commit()
 
     def json(self):
-        return {k: v for k, v in self.__dict__.items() if not k.startswith("__")}
+        return {k: v for k, v in self.__dict__.items() if not k.startswith("_")}

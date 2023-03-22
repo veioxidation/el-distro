@@ -9,6 +9,7 @@ from models.MemberSkillsets import member_skillsets
 class Member(CoreModel):
     __tablename__ = 'members'
     __table_args__ = {'schema': SCHEMA_NAME}
+    __mapper_args__ = {"exclude_properties": ["uploaded"]}
 
     id = Column(Integer, primary_key=True)
     name = Column(String(50), nullable=False)
@@ -36,3 +37,7 @@ class Member(CoreModel):
 
     def get_assignments(self):
         return self.assignments
+
+    @classmethod
+    def query_by_name(cls, s, **kwargs):
+        return s.query(cls).filter_by(name=kwargs['name']).first()

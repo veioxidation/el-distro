@@ -8,6 +8,7 @@ from models.CoreModel import CoreModel
 class Assignment(CoreModel):
     __tablename__ = 'assignments'
     __table_args__ = {'schema': SCHEMA_NAME}
+    __mapper_args__ = {"exclude_properties": ["uploaded"]}
 
     id = Column(Integer, primary_key=True)
     capacity = Column(Integer, nullable=False)
@@ -37,4 +38,4 @@ class Assignment(CoreModel):
     @classmethod
     def query_by_member_and_project_id(cls, s, project_id, member_id):
         return s.query(cls).filter_by(project_id=project_id,
-                                      member_id=member_id).all()
+                                      member_id=member_id).first()

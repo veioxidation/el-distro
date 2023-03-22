@@ -9,7 +9,6 @@ from models.Member import Member
 from models.Project import Project
 # Assign a member to a project, taking into consideration existing assignments
 from models.Skillset import Skillset
-from models.db import Session
 
 
 def assign_member_to_project(session, member_id, project_id, capacity):
@@ -70,67 +69,48 @@ def check_project_assignments(session, project_id):
 
 
 # Calculate the due date for a project
-def calculate_project_due_date(project_id):
-    session = Session()
+def calculate_project_due_date(session, project_id):
     try:
         project = session.query(Project).get(project_id)
         if not project:
             raise ValueError(f"Project with id {project_id} does not exist")
 
-        total_effort = project.estimated_effort
-        total_capacity = 0
-        for assignment in project.assignments:
-            total_capacity += assignment.capacity_level
-
+        total_effort = project.effort_estimate
+        total_capacity = sum([a.capacity for a in project.assignments])
         if total_capacity == 0:
             raise ValueError("Total capacity of assigned team members is 0")
 
-        days_remaining = total_effort / total_capacity
+        days_remaining = total_effort / total_capacity * 100
 
-        today = datetime.date.today()
-        due_date = today + datetime.timedelta(days=days_remaining)
-
+        due_date = project.start_date + datetime.timedelta(days=days_remaining)
         return due_date
     except IntegrityError:
         # Handle any database errors that may occur
         session.rollback()
         raise ValueError('Invalid project ID')
-    finally:
-        session.close()
 
 
-def get_total_capacity():
-    session = Session()
+def get_total_capacity(session):
     try:
-        return session.query(func.sum(Assignment.capacity_level)).scalar()
+        return session.query(func.sum(Assignment.capacity)).scalar()
     except IntegrityError:
         # Handle any database errors that may occur
         session.rollback()
         raise ValueError('Invalid project ID')
-    finally:
-        session.close()
 
 
-def get_over_capacity_members():
-    session = Session()
+def get_over_capacity_members(session):
     try:
         members = session.query(Member).all()
         over_capacity_members = []
-        for member in members:
-            total_capacity = sum([assignment.capacity_level for assignment in member.assignments])
-            if total_capacity > member.capacity:
-                over_capacity_members.append(member)
         return over_capacity_members
     except IntegrityError:
         # Handle any database errors that may occur
         session.rollback()
         raise ValueError('Invalid project ID')
-    finally:
-        session.close()
 
 
-def get_assignments_for_project(project_id):
-    session = Session()
+def get_assignments_for_project(session, project_id):
     try:
         project = session.query(Project).get(project_id)
         if not project:
@@ -140,15 +120,11 @@ def get_assignments_for_project(project_id):
         # Handle any database errors that may occur
         session.rollback()
         raise ValueError('Invalid project ID')
-    finally:
-        session.close()
 
 
-def add_new_member(name, email, skills, capacity):
-    session = Session()
+def add_new_member(session, name, email, skills, capacity):
     try:
-        skill_list = [Skillset(name=x) for x in skills.split(",")]
-        [session.add(skill) for skill in skill_list]
+        skill_list = [Skillset.add(session, name=x) for x in skills.split(",")]
         m = Member(name=name, email=email, skillsets=skill_list, capacity=capacity)
         session.add(m)
         session.commit()
@@ -156,12 +132,9 @@ def add_new_member(name, email, skills, capacity):
         # Handle any database errors that may occur
         session.rollback()
         raise ValueError('Invalid project ID')
-    finally:
-        session.close()
 
 
-def remove_member_by_id(member_id):
-    session = Session()
+def remove_member_by_id(session, member_id):
     try:
         session.query(Member).get(member_id).delete()
         session.commit()
@@ -169,5 +142,3 @@ def remove_member_by_id(member_id):
         # Handle any database errors that may occur
         session.rollback()
         raise ValueError('Invalid member ID')
-    finally:
-        session.close()

@@ -9,6 +9,7 @@ from models.MemberSkillsets import member_skillsets
 class Skillset(CoreModel):
     __tablename__ = 'skillsets'
     __table_args__ = {'schema': SCHEMA_NAME}
+    __mapper_args__ = {"exclude_properties": ["uploaded"]}
 
     id = Column(Integer, primary_key=True)
     name = Column(String(50), nullable=False, unique=True)
