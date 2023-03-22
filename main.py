@@ -185,7 +185,7 @@ def create_project():
     with Session() as s:
         p = Project.add(s, name=name, effort_estimate=effort_estimate)
         s.commit()
-    return jsonify({'message': 'Project created successfully'}), 201
+    return jsonify({'message': 'Project has been created successfully'}), 201
 
 
 @app.route('/projects/<int:member_id>', methods=['DELETE'])
