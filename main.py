@@ -82,7 +82,7 @@ def assign_member():
 
     if assignment is not None:
         return jsonify(
-            {'message': f'Member {member_id} assigned to project {project_id} with capacity {capacity}'}), 200
+            {'message': f'Member {member_id} has been assigned to project {project_id} with capacity {capacity}'}), 200
     else:
         return jsonify({'error': 'Could not assign member to project'}), 400
 
