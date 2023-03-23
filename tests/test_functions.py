@@ -76,7 +76,7 @@ class AssignmentFunctions(unittest.TestCase):
             m2_id = m2.id
             p_id = p.id
 
-            p.start_date = date(2024, 1, 1)
+            p.start_date = date(2023, 1, 1)
             a = assign_member_to_project(s, m_id, p_id, 50)
             # Assign user to a project
             dd1 = calculate_project_due_date(s, p_id)
