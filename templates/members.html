@@ -1,94 +1,61 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h1>Members</h1>
+<h1>Members</h1>
 
-    <!-- Add member form -->
-    <form action="{{ url_for('add_member') }}" method="post">
-        <div class="mb-3">
-            <label for="name" class="form-label">Name</label>
-            <input type="text" class="form-control" id="name" name="name" required>
-        </div>
-        <div class="mb-3">
-            <label for="name" class="form-label">Email</label>
-            <input type="text" class="form-control" id="email" name="email" required>
-        </div>
-        <div class="mb-3">
-            <label for="skills" class="form-label">Skills</label>
-            <select class="form-select" id="skills" name="skills" multiple required>
-                {% for skill in skills %}
-                    <option value="{{ skill.id }}">{{ skill.name }}</option>
-                {% endfor %}
-            </select>
-        </div>
-        <div class="mb-3">
-            <label for="capacity" class="form-label">Capacity</label>
-            <input type="number" class="form-control" id="capacity" name="capacity" min="0" required>
-        </div>
-        <button type="submit" class="btn btn-primary">Add Member</button>
-    </form>
-
-
-    <!-- Members Table -->
-    <h2 class="mt-4">Members List</h2>
-    <table class="table">
-        <thead>
-            <tr>
-                <th scope="col">#</th>
-                <th scope="col">Name</th>
-                <th scope="col">Capacity</th>
-                <th scope="col">Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for member in members %}
-                <tr>
-                    <th scope="row">{{ loop.index }}</th>
-                    <td>{{ member.name }}</td>
-                    <td>{{ member.capacity }}</td>
-                    <td>
-                        <a href="{{ url_for('delete_member', member_id=member.id) }}" class="btn btn-danger">Delete</a>
-                    </td>
-                </tr>
+<!-- Add member form -->
+<form id="add-member-form" method="post">
+    <div class="mb-3">
+        <label for="name" class="form-label">Name</label>
+        <input type="text" class="form-control" id="name" name="name" required>
+    </div>
+    <div class="mb-3">
+        <label for="name" class="form-label">Email</label>
+        <input type="text" class="form-control" id="email" name="email" required>
+    </div>
+    <div class="mb-3">
+        <label for="skills" class="form-label">Skills</label>
+        <select class="form-select" id="skills" name="skills" multiple required>
+            {% for skill in skills %}
+            <option value="{{ skill.id }}">{{ skill.name }}</option>
             {% endfor %}
-        </tbody>
-    </table>
+        </select>
+    </div>
+    <div class="mb-3">
+        <label for="capacity" class="form-label">Capacity</label>
+        <input type="number" class="form-control" id="capacity" name="capacity" min="0" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Add Member</button>
+</form>
+
+
+<!-- Members Table -->
+<h2 class="mt-4">Members List</h2>
+<table class="table">
+    <thead>
+    <tr>
+        <th scope="col">#</th>
+        <th scope="col">Name</th>
+        <th scope="col">Capacity</th>
+        <th scope="col">Actions</th>
+    </tr>
+    </thead>
+    <tbody id="members-tbody">
+    {% for member in members %}
+    <tr data-member-id="{{ member.id }}">
+        <th scope="row">{{ member.id }}</th>
+        <td>{{ member.name }}</td>
+        <td>{{ member.capacity }}</td>
+        <td>
+            <a href="{{ url_for('delete_member', member_id=member.id) }}" class="btn btn-danger">Delete</a>
+        </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
 {% endblock %}
 
 
-
-{% block extra_js %}
-<script>
-    // Handle the add-member form submission
-    $("#add-member-form").submit(function (event) {
-        event.preventDefault();
-
-        const formData = $(this).serialize();
-
-        $.ajax({
-            url: "{{ url_for('add_member') }}",
-            type: "post",
-            data: formData,
-            success: function (response) {
-                // Clear the form fields
-                $("#add-member-form").trigger("reset");
-
-                // Add the new member to the table
-                $("#members-tbody").append(response);
-            }
-        });
-    });
-
-    // Handle member deletion
-    function deleteMember(memberId) {
-        $.ajax({
-            url: "{{ url_for('delete_member', member_id='__member_id__') }}".replace('__member_id__', memberId),
-            type: "post",
-            success: function () {
-                // Remove the member from the table
-                $('tr[data-member-id="' + memberId + '"]').remove();
-            }
-        });
-    }
-</script>
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/members.js') }}"></script>
 {% endblock %}

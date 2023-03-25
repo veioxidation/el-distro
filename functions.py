@@ -128,6 +128,7 @@ def add_new_member(session, name: str, email: str, skill_id_list: list, capacity
         m = Member(name=name, email=email, skills=skill_list, capacity=capacity)
         session.add(m)
         session.commit()
+        return m
     except IntegrityError:
         # Handle any database errors that may occur
         session.rollback()

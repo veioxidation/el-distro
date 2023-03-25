@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, make_response
 
 from create_engine import DB_URI
 from functions import *
@@ -50,12 +50,21 @@ def add_member():
 
     # Check if member with the same email already exists
     with Session() as s:
-        add_new_member(s,
-                       name=member_name,
-                       email=member_email,
-                       skill_id_list=member_skills,
-                       capacity=member_capacity)
-    return jsonify({'message': 'Member created successfully'}), 201
+        try:
+            new_member = add_new_member(s,
+                           name=member_name,
+                           email=member_email,
+                           skill_id_list=member_skills,
+                           capacity=member_capacity)
+
+        # Render the new member row and return it
+        # new_member_row = render_template('member_row.html', member=new_member)
+
+            return jsonify(success=True)
+        except Exception as e:
+            # Handle any errors that occur during the database operation
+            s.rollback()
+            return jsonify(success=False, error=str(e))
 
 
 @app.route('/delete_member', methods=['GET'])
