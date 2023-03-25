@@ -1,89 +1,80 @@
-<!-- members.html -->
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="toast_container">
+    <div class="toast" id="member-added-toast" role="alert" aria-live="assertive" aria-atomic="true" data-delay="3000">
+      <div class="toast-header">
+        <strong class="mr-auto">Member Added</strong>
+        <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="toast-body">
+        Member has been added successfully!
+      </div>
+    </div>
+</div>
+
+
 
 <h1>Members</h1>
 
-<!-- Member list -->
-<table>
-  <thead>
-    <tr>
-      <th>ID</th>
-      <th>Name</th>
-      <th>Email</th>
-      <th>Capacity</th>
-      <th>Actions</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for member in members %}
-      <tr>
-        <td>{{ member.id }}</td>
-        <td>{{ member.name }}</td>
-        <td>{{ member.email }}</td>
-        <td>{{ member.capacity }}</td>
-        <td>
-          <button class="remove-member-btn" data-member-id="{{ member.id }}">Remove</button>
-        </td>
-      </tr>
-    {% endfor %}
-  </tbody>
-</table>
-
 <!-- Add member form -->
-<h2>Create New Member</h2>
-<form id="create-member-form">
-  <label>Name:</label><br>
-  <input type="text" name="name"><br>
-  <label>Email:</label><br>
-  <input type="email" name="email"><br>
-  <label>Skills:</label><br>
-  <input type="text" name="skills"><br>
-  <label>Capacity:</label><br>
-  <input type="number" name="capacity"><br>
-  <button type="submit">Create Member</button>
+<form id="add-member-form" method="post">
+    <div class="mb-3">
+        <label for="name" class="form-label">Name</label>
+        <input type="text" class="form-control" id="name" name="name" required>
+    </div>
+    <div class="mb-3">
+        <label for="name" class="form-label">Email</label>
+        <input type="text" class="form-control" id="email" name="email" required>
+    </div>
+    <div class="mb-3">
+        <label for="skills" class="form-label">Skills</label>
+        <select class="form-select" id="skills" name="skills" multiple required>
+            {% for skill in skills %}
+            <option value="{{ skill.id }}">{{ skill.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="mb-3">
+        <label for="capacity" class="form-label">Capacity</label>
+        <input type="number" class="form-control" id="capacity" name="capacity" min="0" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Add Member</button>
 </form>
-<p id="create-member-message"></p>
 
-<script>
-  const createMemberForm = document.querySelector('#create-member-form');
-  const createMemberMessage = document.querySelector('#create-member-message');
-  const removeMemberButtons = document.querySelectorAll('.remove-member-btn');
 
-  // Event listener for submitting the create member form
-  createMemberForm.addEventListener('submit', async (event) => {
-    event.preventDefault();
+<!-- Members Table -->
+<h2 class="mt-4">Members List</h2>
+<table class="table">
+    <thead>
+    <tr>
+        <th scope="col">#</th>
+        <th scope="col">Name</th>
+        <th scope="col">Capacity</th>
+        <th scope="col">Skills</th>
+        <th scope="col">Actions</th>
+    </tr>
+    </thead>
+    <tbody id="members-tbody">
+    {% for member in members %}
+    <tr data-member-id="{{ member.id }}">
+        <th scope="row">{{ member.id }}</th>
+        <td>{{ member.name }}</td>
+        <td>{{ member.capacity }}</td>
+        <td>{{ ', '.join(member.skills|map(attribute='name')) }}</td>
+        <td>
+            <button type="button" class="btn btn-danger" onclick="deleteMember({{ member.id }})">Delete</button>
+        </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
 
-    const formData = new FormData(createMemberForm);
-    const name = formData.get('name');
-    const email = formData.get('email');
-    const skills = formData.get('skills');
-    const capacity = formData.get('capacity');
 
-    const response = await fetch('/members', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, email, skills, capacity })
-    });
-
-    if (response.ok) {
-      createMemberMessage.textContent = 'Member created successfully';
-      createMemberForm.reset();
-    } else {
-      createMemberMessage.textContent = 'Error creating member';
-    }
-  });
-
-  // Event listener for clicking the remove member button
-  removeMemberButtons.forEach((button) => {
-    button.addEventListener('click', async () => {
-      const memberId = button.dataset.memberId;
-
-      const response = await fetch(`/members/${memberId}`, {
-        method: 'DELETE'
-      });
-
-      if (response.ok) {
-        button.closest('tr').remove();
-      }
-    });
-  });
-</script>
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/members.js') }}"></script>
+{% endblock %}

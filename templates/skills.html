@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Skills</h1>
+
+    <!-- Add member form -->
+    <form action="{{ url_for('add_skill') }}" method="post">
+        <div class="mb-3">
+            <label for="name" class="form-label">Name</label>
+            <input type="text" class="form-control" id="name" name="name" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Add Skill</button>
+    </form>
+
+
+    <!-- Skill Table -->
+    <h2 class="mt-4">Skill List</h2>
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">Name</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for skill in skills %}
+                <tr>
+                    <th scope="row">{{ loop.index }}</th>
+                    <td>{{ skill.id }}</td>
+                    <td>{{ skill.name }}</td>
+                    <td>
+                        <a href="{{ url_for('delete_skill', skill_id=skill.id) }}" class="btn btn-danger">Delete</a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

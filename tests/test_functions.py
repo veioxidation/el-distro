@@ -85,7 +85,7 @@ class AssignmentFunctions(unittest.TestCase):
             dd2 = calculate_project_due_date(s, p_id)
 
             # Assign user to a project
-            _ = assign_member_to_project(s, m2_id, p_id, 100)
+            _ = assign_member_to_project(s, m2_id, p_id, start_capacity)
             dd3 = calculate_project_due_date(s, p_id)
 
             self.assertEqual((dd1 - p.start_date).days, 40)

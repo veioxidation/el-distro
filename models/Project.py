@@ -31,7 +31,7 @@ class Project(CoreModel):
     status = Column(Enum(ProjectStatusEnum), default=ProjectStatusEnum.backlog)
 
     # Define the many-to-one relationship with skill sets
-    # skillset_id = Column(Integer, ForeignKey(f'skillsets.id'))
+    # skillset_id = Column(Integer, ForeignKey(f'skills.id'))
     # skillset = relationship('Skillset', back_populates=f'projects')
 
     # Define the one-to-many relationship with assignments

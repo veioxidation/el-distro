@@ -8,7 +8,7 @@ from models.Assignment import Assignment
 from models.Member import Member
 from models.Project import Project
 # Assign a member to a project, taking into consideration existing assignments
-from models.Skillset import Skillset
+from models.Skill import Skill
 
 
 def assign_member_to_project(session, member_id, project_id, capacity):
@@ -122,12 +122,13 @@ def get_assignments_for_project(session, project_id):
         raise ValueError('Invalid project ID')
 
 
-def add_new_member(session, name, email, skills, capacity):
+def add_new_member(session, name: str, email: str, skill_id_list: list, capacity: int):
     try:
-        skill_list = [Skillset.add(session, name=x) for x in skills.split(",")]
-        m = Member(name=name, email=email, skillsets=skill_list, capacity=capacity)
+        skill_list = [Skill.query_by_id(session, skill_id) for skill_id in skill_id_list]
+        m = Member(name=name, email=email, skills=skill_list, capacity=capacity)
         session.add(m)
         session.commit()
+        return m
     except IntegrityError:
         # Handle any database errors that may occur
         session.rollback()

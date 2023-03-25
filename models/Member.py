@@ -1,9 +1,10 @@
-from sqlalchemy import Column, Integer, String, DateTime
+from sqlalchemy import Column, Integer, String
+from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship
 
 from config import SCHEMA_NAME
 from models.CoreModel import CoreModel
-from models.MemberSkillsets import member_skillsets
+from models.MemberSkills import member_skills
 
 
 class Member(CoreModel):
@@ -16,18 +17,15 @@ class Member(CoreModel):
     capacity = Column(Integer, nullable=False, default=100)
     email = Column(String(100), nullable=True)
 
-    # Define the many-to-many relationship with skillsets
-    skillsets = relationship('Skillset', secondary=member_skillsets, back_populates=f'members')
+    # Define the many-to-many relationship with skills
+    skills = relationship('Skill', secondary=member_skills, back_populates=f'members')
 
     # Define the one-to-many relationship with assignments
     assignments = relationship('Assignment', back_populates=f'member', cascade='all, delete')
 
-    def get_skills_for_member(member_id):
-        member = Member.query.get(member_id)
-        skillsets = []
-        for skill in member.skills:
-            skillsets.append(skill.name)
-        return skillsets
+    @hybrid_property
+    def skills_list(self):
+        return [skill.name for skill in self.skills]
 
     def get_free_capacity(self):
         return self.capacity - sum([a.capacity for a in self.assignments])
