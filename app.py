@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, render_template, request, jsonify
 
 from create_engine import DB_URI
 from functions import *
@@ -12,62 +12,81 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = DB_URI
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
+# from app_members import members_interface
+#
+# app.register_blueprint(members_interface)
 
-# db = SQLAlchemy(app)
-# db.init_app(app)
-
-
-# TEMPLATES
 
 @app.route('/')
 def index():
     return render_template('index.html')
 
 
-@app.route('/members_add')
-def members():
-    return render_template('members.html', members = get_all_members())
-
-
-@app.route('/member_menu')
-def member_menu():
-
-    return render_template('new_members.html')
+@app.route('/skills', methods=['GET'])
+def skills():
+    with Session() as s:
+        skills = s.query(Skill).all()
+    return render_template('skills.html', skills=skills)
 
 
 # MEMBERS
+@app.route('/members', methods=['GET'])
+def members():
+    with Session() as s:
+        members = s.query(Member).all()
+        skills = s.query(Skill).all()
+    return render_template('members.html', members=members, skills=skills)
 
-@app.route('/create_member', methods=['POST'])
-def create_member():
-    member_name = request.json.get('name')
-    member_email = request.json.get('email')
-    member_skills = request.json.get('skills')
-    member_capacity = request.json.get('capacity')
+
+@app.route('/add_member', methods=['POST'])
+def add_member():
+    member_name = request.form['name']
+    member_email = request.form['email']
+    member_skills = request.form.getlist('skills')
+    member_capacity = int(request.form['capacity'])
 
     if not all([member_name, member_email, member_skills, member_capacity]):
         return jsonify({'error': 'Missing fields'}), 400
 
     # Check if member with the same email already exists
     with Session() as s:
-        add_new_member(s, name=member_name, email=member_email, skills=member_skills, capacity=member_capacity)
+        add_new_member(s,
+                       name=member_name,
+                       email=member_email,
+                       skill_id_list=member_skills,
+                       capacity=member_capacity)
     return jsonify({'message': 'Member created successfully'}), 201
 
 
-@app.route('/members')
-def get_all_members():
+@app.route('/delete_member', methods=['GET'])
+def delete_member():
+    member_id = request.args['member_id']
     with Session() as s:
-        resp = [m.json() for m in s.query(Member).all()]
+        Member.remove_by_id(s, member_id)
+    return jsonify({'message': 'Member deleted successfully'}), 200
 
-    return jsonify(resp), 200
+
+@app.route('/add_skill', methods=['POST'])
+def add_skill():
+    skill_name = request.form['name']
+    if not all([skill_name]):
+        return jsonify({'error': 'Missing fields'}), 400
+
+    # Add new skill
+    with Session() as s:
+        Skill.add(s, name=skill_name)
+    return jsonify({'message': 'Skill created successfully'}), 201
 
 
 # TODO - does it have to be a GET?
-@app.route('/delete_member', methods=['GET'])
-def delete_member():
-    member_id = request.json['id']
+
+
+@app.route('/delete_skill', methods=['GET'])
+def delete_skill():
+    skill_id = request.args['skill_id']
     with Session() as s:
-        remove_member_by_id(s, member_id)
-    return jsonify({'message': 'Member deleted successfully'}), 200
+        Skill.remove_by_id(s, skill_id)
+    return jsonify({'message': 'Skill deleted successfully'}), 200
 
 
 @app.route('/assign_member', methods=['POST'])
@@ -199,7 +218,7 @@ def remove_project(project_id):
 @app.route('/skills', methods=['GET'])
 def get_all_skills():
     with Session() as s:
-        resp = [skill.json() for skill in s.query(Skillset).all()]
+        resp = [skill.json() for skill in s.query(Skill).all()]
 
     return jsonify(resp), 200
 

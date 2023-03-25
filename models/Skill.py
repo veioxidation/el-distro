@@ -3,11 +3,11 @@ from sqlalchemy.orm import relationship
 
 from config import SCHEMA_NAME
 from models.CoreModel import CoreModel
-from models.MemberSkillsets import member_skillsets
+from models.MemberSkills import member_skills
 
 
-class Skillset(CoreModel):
-    __tablename__ = 'skillsets'
+class Skill(CoreModel):
+    __tablename__ = 'skills'
     __table_args__ = {'schema': SCHEMA_NAME}
     __mapper_args__ = {"exclude_properties": ["uploaded"]}
 
@@ -15,7 +15,7 @@ class Skillset(CoreModel):
     name = Column(String(50), nullable=False, unique=True)
 
     # Define the many-to-many relationship with members
-    members = relationship('Member', secondary=member_skillsets, back_populates=f'skillsets')
+    members = relationship('Member', secondary=member_skills, back_populates=f'skills')
 
     @classmethod
     def add(cls, s, **kwargs):

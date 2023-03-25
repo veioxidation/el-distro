@@ -3,7 +3,7 @@ import unittest
 from models.Assignment import Assignment
 from models.Member import Member
 from models.Project import Project
-from models.Skillset import Skillset
+from models.Skill import Skill
 from models.db import Session
 
 session = Session()
@@ -47,17 +47,17 @@ class TestDatabase(unittest.TestCase):
 
     def test_skills(self):
         skills_names = ['Python', 'AA', 'Kofax']
-        skills = [Skillset.add(session, name=x) for x in skills_names]
-        member = Member.add(session, name='Przemked', skillsets=skills, capacity=100)
+        skills = [Skill.add(session, name=x) for x in skills_names]
+        member = Member.add(session, name='Przemked', skills=skills, capacity=100)
         self.assertEqual(len(skills), 3)
         Member.remove_by_id(session, member.id)
 
 
 
     def test_project_assignment(self):
-        ss1 = Skillset.add(session, name='Python')
-        ss2 = Skillset.add(session, name='AA')
-        m = Member(name='Przemek', capacity=100, skillsets = [ss1, ss2])
+        ss1 = Skill.add(session, name='Python')
+        ss2 = Skill.add(session, name='AA')
+        m = Member(name='Przemek', capacity=100, skills = [ss1, ss2])
         p = Project(name='Project 1')
         a = Assignment(capacity=100, member_id=m.id, project_id=p.id)
 

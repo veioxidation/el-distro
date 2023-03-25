@@ -1,0 +1,49 @@
+//// -- LEVEL 1
+//// -- Schemas, Tables and References
+
+// Creating tables
+// You can define the tables with full schema names
+
+Table team_capacity.Member as Member{
+  id int [pk, increment]
+  email varchar
+  capacity int [default:100]
+  uploaded datetime [default: `now()`]
+}
+
+
+Table team_capacity.Skill as Skill{
+  id int [pk, increment]
+  name varchar
+  uploaded datetime [default: `now()`]
+}
+
+Table team_capacity.MemberSkills as MemberSkills{
+  member_id int
+  skill_id int
+  uploaded datetime [default: `now()`]
+
+}
+
+Table team_capacity.Project as Project{
+  id int [pk, increment]
+  name varchar
+  uploaded datetime [default: `now()`]
+
+}
+
+Table team_capacity.Assingment as Assignment{
+  id int [pk, increment]
+  project_id int [not null]
+  member_id int [not null]
+  capacity int [not null, default: 100]
+  uploaded datetime [default: `now()`]
+}
+
+Ref: Member.id < MemberSkills.member_id // one-to-many
+Ref: Skill.id < MemberSkills.skill_id // many-to-one
+
+Ref: Member.id < Assignment.member_id // one-to-many
+Ref: Project.id < Assignment.project_id // one-to-many
+
+
