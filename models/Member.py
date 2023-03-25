@@ -1,4 +1,5 @@
-from sqlalchemy import Column, Integer, String, DateTime
+from sqlalchemy import Column, Integer, String
+from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship
 
 from config import SCHEMA_NAME
@@ -22,12 +23,9 @@ class Member(CoreModel):
     # Define the one-to-many relationship with assignments
     assignments = relationship('Assignment', back_populates=f'member', cascade='all, delete')
 
-    def get_skills_for_member(member_id):
-        member = Member.query.get(member_id)
-        skills = []
-        for skill in member.skills:
-            skills.append(skill.name)
-        return skills
+    @hybrid_property
+    def skills_list(self):
+        return [skill.name for skill in self.skills]
 
     def get_free_capacity(self):
         return self.capacity - sum([a.capacity for a in self.assignments])

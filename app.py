@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify, make_response
+from flask import Flask, render_template, request, jsonify
 
 from create_engine import DB_URI
 from functions import *
@@ -11,6 +11,7 @@ app = Flask(__name__)
 # Configuration for the database
 app.config['SQLALCHEMY_DATABASE_URI'] = DB_URI
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
 
 # from app_members import members_interface
 #
@@ -35,7 +36,7 @@ def members():
     with Session() as s:
         members = s.query(Member).all()
         skills = s.query(Skill).all()
-    return render_template('members.html', members=members, skills=skills)
+        return render_template('members.html', members=members, skills=skills)
 
 
 @app.route('/add_member', methods=['POST'])
@@ -52,27 +53,39 @@ def add_member():
     with Session() as s:
         try:
             new_member = add_new_member(s,
-                           name=member_name,
-                           email=member_email,
-                           skill_id_list=member_skills,
-                           capacity=member_capacity)
+                                        name=member_name,
+                                        email=member_email,
+                                        skill_id_list=member_skills,
+                                        capacity=member_capacity)
 
-        # Render the new member row and return it
-        # new_member_row = render_template('member_row.html', member=new_member)
+            # Render the new member row and return it
+            # new_member_row = render_template('member_row.html', member=new_member)
 
-            return jsonify(success=True)
+            return jsonify(success=True, member={'id': new_member.id,
+                                                 'name': new_member.name,
+                                                 'capacity': new_member.capacity,
+                                                 'skills_list': new_member.skills_list}, )
         except Exception as e:
             # Handle any errors that occur during the database operation
             s.rollback()
             return jsonify(success=False, error=str(e))
 
 
-@app.route('/delete_member', methods=['GET'])
-def delete_member():
-    member_id = request.args['member_id']
+# @app.route('/delete_member', methods=['DELETE'])
+# def delete_member():
+#     member_id = request.args['member_id']
+#     with Session() as s:
+#         Member.remove_by_id(s, member_id)
+#     return jsonify({'message': 'Member deleted successfully'}), 200
+
+@app.route('/delete_member/<int:member_id>', methods=['DELETE'])
+def delete_member(member_id):
     with Session() as s:
-        Member.remove_by_id(s, member_id)
-    return jsonify({'message': 'Member deleted successfully'}), 200
+        try:
+            Member.remove_by_id(s, member_id)
+            return jsonify(success=True), 200
+        except Exception as e:
+            return jsonify(success=False, error="Member not found"), 404
 
 
 @app.route('/add_skill', methods=['POST'])
@@ -84,10 +97,7 @@ def add_skill():
     # Add new skill
     with Session() as s:
         Skill.add(s, name=skill_name)
-    return jsonify({'message': 'Skill created successfully'}), 201
-
-
-# TODO - does it have to be a GET?
+        return jsonify({'message': 'Skill created successfully'}), 201
 
 
 @app.route('/delete_skill', methods=['GET'])
@@ -95,7 +105,7 @@ def delete_skill():
     skill_id = request.args['skill_id']
     with Session() as s:
         Skill.remove_by_id(s, skill_id)
-    return jsonify({'message': 'Skill deleted successfully'}), 200
+        return jsonify({'message': 'Skill deleted successfully'}), 200
 
 
 @app.route('/assign_member', methods=['POST'])
@@ -233,4 +243,5 @@ def get_all_skills():
 
 
 if __name__ == '__main__':
+    print(app.url_map)
     app.run()

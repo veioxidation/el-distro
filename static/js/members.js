@@ -1,28 +1,59 @@
-document.getElementById('add-member-form').addEventListener('submit', function(event) {
-    event.preventDefault();
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOMContentLoaded event fired');
+    document.getElementById('add-member-form').addEventListener('submit', function(event) {
+        console.log('Form submitted');
+        event.preventDefault();
+            event.preventDefault();
 
-    const formData = new FormData(event.target);
-    fetch('/add_member', {
-        method: 'POST',
-        body: formData,
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            // Append the new member to the table
-            const newRow = document.createElement('tr');
-            newRow.innerHTML = `
-                <td>${data.member.name}</td>
-                <td>${data.member.skills.join(', ')}</td>
-                <td>${data.member.capacity}</td>
-            `;
-            document.getElementById('members-tbody').appendChild(newRow);
+            const formData = new FormData(event.target);
+            fetch('/add_member', {
+                method: 'POST',
+                body: formData,
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Append the new member to the table
+                    const newRow = document.createElement('tr');
+                    newRow.innerHTML = `
+                        <td>${data.member.id}</td>
+                        <td>${data.member.name}</td>
+                        <td>${data.member.capacity}</td>
+                        <td>` + data.member.skills_list.join(', ') + `</td>
+                        <td></td>
+                    `;
+                    document.getElementById('members-tbody').appendChild(newRow);
 
-            // Clear the form
-            event.target.reset();
-        } else {
-            // Handle errors (e.g., display an error message)
-            alert('Error adding member: ' + data.error);
-        }
+                    // Show the Toast
+                    const toastElement = document.getElementById('member-added-toast');
+                    const toast = new bootstrap.Toast(toastElement);
+                    toast.show();
+
+                    // Clear the form
+                    event.target.reset();
+                } else {
+                    // Handle errors (e.g., display an error message)
+                    alert('Error adding member: ' + data.error);
+                }
+            });
+
     });
 });
+
+
+function deleteMember(memberId) {
+  fetch('/delete_member/' + memberId, {
+    method: 'DELETE',
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.success) {
+        // Remove the member row from the table
+        const row = document.querySelector(`[data-member-id="${memberId}"]`);
+        row.remove();
+      } else {
+        // Handle errors (e.g., display an error message)
+        alert('Error deleting member: ' + data.error);
+      }
+    });
+}
