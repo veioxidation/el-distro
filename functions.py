@@ -4,6 +4,7 @@ from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError
 
 # Create a session factory for connecting to the database
+import routes.assignments
 from models.Assignment import Assignment
 from models.Member import Member
 from models.Project import Project
@@ -56,7 +57,7 @@ def check_project_assignments(session, project_id):
         # TODO -> Assignments should be timed.
         # Get the project and its assignments
         project = session.query(Project).get(project_id)
-        assignments = project.assignments
+        assignments = routes.assignments.assignments
 
         # Calculate the total capacity of all assignments
         total_capacity = sum(assignment.capacity for assignment in assignments)
@@ -77,7 +78,7 @@ def calculate_project_due_date(session, project_id):
             raise ValueError(f"Project with id {project_id} does not exist")
 
         total_effort = project.effort_estimate
-        total_capacity = sum([a.capacity for a in project.assignments])
+        total_capacity = sum([a.capacity for a in routes.assignments.assignments])
         if total_capacity == 0:
             raise ValueError("Total capacity of assigned team members is 0")
 
@@ -116,7 +117,7 @@ def get_assignments_for_project(session, project_id):
         project = session.query(Project).get(project_id)
         if not project:
             raise ValueError(f"Project with id {project_id} does not exist")
-        return project.assignments
+        return routes.assignments.assignments
     except IntegrityError:
         # Handle any database errors that may occur
         session.rollback()
