@@ -46,6 +46,7 @@ def check_project_assignments(session, project_id):
     """
     # Check if the assignments for a project are sufficient to deliver the project
     Args:
+        session: db session
         project_id: Look at the project timelines and assignments and say if this is enough.
 
     Returns:
