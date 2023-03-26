@@ -20,7 +20,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('base.html')
 
 
 @app.route('/skills', methods=['GET'])
@@ -71,13 +71,6 @@ def add_member():
             return jsonify(success=False, error=str(e))
 
 
-# @app.route('/delete_member', methods=['DELETE'])
-# def delete_member():
-#     member_id = request.args['member_id']
-#     with Session() as s:
-#         Member.remove_by_id(s, member_id)
-#     return jsonify({'message': 'Member deleted successfully'}), 200
-
 @app.route('/delete_member/<int:member_id>', methods=['DELETE'])
 def delete_member(member_id):
     with Session() as s:
@@ -92,146 +85,181 @@ def delete_member(member_id):
 def add_skill():
     skill_name = request.form['name']
     if not all([skill_name]):
-        return jsonify({'error': 'Missing fields'}), 400
+        return jsonify(success=False), 400
 
     # Add new skill
     with Session() as s:
-        Skill.add(s, name=skill_name)
-        return jsonify({'message': 'Skill created successfully'}), 201
+        new_skill = Skill.add(s, name=skill_name)
+        return jsonify(success=True,
+                       skill={'id': new_skill.id,
+                              'name': new_skill.name}), 201
 
 
-@app.route('/delete_skill', methods=['GET'])
-def delete_skill():
-    skill_id = request.args['skill_id']
+@app.route('/delete_skill/<int:skill_id>', methods=['DELETE'])
+def delete_skill(skill_id):
     with Session() as s:
-        Skill.remove_by_id(s, skill_id)
-        return jsonify({'message': 'Skill deleted successfully'}), 200
+        try:
+            Skill.remove_by_id(s, skill_id)
+            return jsonify(success=True), 200
+        except Exception as e:
+            return jsonify(success=False, error="Skill not found"), 404
 
 
-@app.route('/assign_member', methods=['POST'])
-def assign_member():
-    project_id = request.json['project_id']
-    member_id = request.json['member_id']
-    capacity = request.json['capacity']
+# @app.route('/assign_member', methods=['POST'])
+# def assign_member():
+#     project_id = request.json['project_id']
+#     member_id = request.json['member_id']
+#     capacity = request.json['capacity']
+#
+#     # Assign the member to the project
+#     with Session() as s:
+#         assignment = assign_member_to_project(s, project_id, member_id, capacity)
+#
+#     if assignment is not None:
+#         return jsonify(
+#             {'message': f'Member {member_id} has been assigned to project {project_id} with capacity {capacity}'}), 200
+#     else:
+#         return jsonify({'error': 'Could not assign member to project'}), 400
 
-    # Assign the member to the project
-    with Session() as s:
-        assignment = assign_member_to_project(s, project_id, member_id, capacity)
 
-    if assignment is not None:
-        return jsonify(
-            {'message': f'Member {member_id} has been assigned to project {project_id} with capacity {capacity}'}), 200
-    else:
-        return jsonify({'error': 'Could not assign member to project'}), 400
-
-
-@app.route('/unassign_member', methods=['POST'])
-def unassign_member():
-    project_id = request.json['project_id']
-    member_id = request.json['member_id']
-
-    # Unassign the member from the project
-    with Session() as s:
-        unassign_member_from_project(s, project_id, member_id)
-
-    return jsonify({'message': f'Member {member_id} unassigned from project {project_id}'}), 200
+# @app.route('/unassign_member', methods=['POST'])
+# def unassign_member():
+#     project_id = request.json['project_id']
+#     member_id = request.json['member_id']
+#
+#     # Unassign the member from the project
+#     with Session() as s:
+#         unassign_member_from_project(s, project_id, member_id)
+#
+#     return jsonify({'message': f'Member {member_id} unassigned from project {project_id}'}), 200
 
 
 # ASSIGNMENTS
+@app.route('/add_assignment', methods=['POST'])
+def add_assignment():
+    project_id = int(request.form['project'])
+    member_id = int(request.form['member'])
+    capacity = int(request.form['capacity'])
+    if not all([project_id, member_id, capacity]):
+        return jsonify(success=False), 400
 
-@app.route('/change_capacity', methods=['POST'])
-def change_capacity():
-    project_id = request.json['project_id']
-    member_id = request.json['member_id']
-    new_capacity = request.json['new_capacity']
-
-    # Change the capacity for the assignment
     with Session() as s:
-        a = Assignment.query_by_member_and_project_id(s, project_id=project_id, member_id=member_id)
-        a.capacity = new_capacity
-        s.commit()
+        assignment = assign_member_to_project(s, project_id=project_id, member_id=member_id, capacity=capacity)
 
-    return jsonify(
-        {'message': f'Capacity for member {member_id} on project {project_id} changed to {new_capacity}'}), 200
+        if assignment is not None:
+            return jsonify(success=True, assignment=assignment.json()), 200
+        else:
+            return jsonify(success=False), 400
 
-
-@app.route('/check_assignments', methods=['POST'])
-def check_assignments():
-    project_id = request.json['project_id']
-
-    # Check the assignments for the project
+@app.route('/delete_assignment/<int:assignment_id>', methods=['DELETE'])
+def delete_assignment(assignment_id):
     with Session() as s:
-        assignments = get_assignments_for_project(s, project_id)
-        estimated_effort = s.query(Project).filter_by(id=project_id).first().estimated_effort
+        try:
+            Assignment.remove_by_id(s, assignment_id)
+            return jsonify(success=True), 200
+        except Exception as e:
+            return jsonify(success=False, error="Assignment not found"), 404
 
-    total_capacity = sum([a.capacity for a in assignments])
+# @app.route('/change_capacity', methods=['POST'])
+# def change_capacity():
+#     project_id = request.json['project_id']
+#     member_id = request.json['member_id']
+#     new_capacity = request.json['new_capacity']
+#
+#     # Change the capacity for the assignment
+#     with Session() as s:
+#         a = Assignment.query_by_member_and_project_id(s, project_id=project_id, member_id=member_id)
+#         a.capacity = new_capacity
+#         s.commit()
+#
+#     return jsonify(
+#         {'message': f'Capacity for member {member_id} on project {project_id} changed to {new_capacity}'}), 200
+#
+#
+# @app.route('/check_assignments', methods=['POST'])
+# def check_assignments():
+#     project_id = request.json['project_id']
+#
+#     # Check the assignments for the project
+#     with Session() as s:
+#         assignments = get_assignments_for_project(s, project_id)
+#         estimated_effort = s.query(Project).filter_by(id=project_id).first().estimated_effort
+#
+#     total_capacity = sum([a.capacity for a in assignments])
+#
+#     if total_capacity >= estimated_effort:
+#         return jsonify({'message': f'Assignments are sufficient to deliver project {project_id}'}), 200
+#     else:
+#         return jsonify({'error': f'Assignments are not sufficient to deliver project {project_id}'}), 400
 
-    if total_capacity >= estimated_effort:
-        return jsonify({'message': f'Assignments are sufficient to deliver project {project_id}'}), 200
-    else:
-        return jsonify({'error': f'Assignments are not sufficient to deliver project {project_id}'}), 400
 
-
-@app.route('/calculate_due_date', methods=['POST'])
-def calculate_due_date():
-    project_id = request.json['project_id']
-
-    # Calculate the due date for the project
-    with Session() as s:
-        due_date = calculate_project_due_date(s, project_id)
-
-    return jsonify({'due_date': str(due_date)}), 200
-
-
-@app.route('/check_capacity', methods=['GET'])
-def check_capacity():
-    # Check the overall capacity for the team
-    with Session() as s:
-        total_capacity = get_total_capacity(s)
-        over_capacity = [m.id for m in get_over_capacity_members(s)]
-
-    return jsonify({'total_capacity': total_capacity, 'over_capacity': over_capacity}), 200
+# @app.route('/calculate_due_date', methods=['POST'])
+# def calculate_due_date():
+#     project_id = request.json['project_id']
+#
+#     # Calculate the due date for the project
+#     with Session() as s:
+#         due_date = calculate_project_due_date(s, project_id)
+#
+#     return jsonify({'due_date': str(due_date)}), 200
+#
+#
+# @app.route('/check_capacity', methods=['GET'])
+# def check_capacity():
+#     # Check the overall capacity for the team
+#     with Session() as s:
+#         total_capacity = get_total_capacity(s)
+#         over_capacity = [m.id for m in get_over_capacity_members(s)]
+#
+#     return jsonify({'total_capacity': total_capacity, 'over_capacity': over_capacity}), 200
 
 
 @app.route('/assignments', methods=['GET'])
-def get_all_assignments():
+def assignments():
     with Session() as s:
-        resp = [a.json() for a in s.query(Assignment).all()]
-
-    return jsonify(resp), 200
+        projects = s.query(Project).all()
+        assignments = s.query(Assignment).all()
+        members = s.query(Member).all()
+        return render_template('assignments.html', projects=projects, assignments=assignments, members=members)
 
 
 ## PROJECTS
 
 @app.route('/projects', methods=['GET'])
-def get_all_projects():
+def projects():
     with Session() as s:
-        resp = [proj.json() for proj in s.query(Project).all()]
+        projects = s.query(Project).all()
+    return render_template('projects.html', projects=projects)
 
-    return jsonify(resp), 200
 
+@app.route('/add_project', methods=['POST'])
+def add_project():
+    project_name = request.form['name']
+    project_effort = int(request.form['effort_estimate'])
+    project_start_date = request.form['start_date'] or None
+    project_due_date = request.form['due_date'] or None
 
-@app.route('/projects', methods=['POST'])
-def create_project():
-    name = request.json.get('name')
-    effort_estimate = int(request.json.get('effort_estimate'))
-
-    if not all([name, effort_estimate]):
-        return jsonify({'error': 'Missing fields'}), 400
+    if not all([project_name, project_effort]):
+        return jsonify(success=False), 400
 
     # Check if member with the same email already exists
     with Session() as s:
-        p = Project.add(s, name=name, effort_estimate=effort_estimate)
-        s.commit()
-    return jsonify({'message': 'Project has been created successfully'}), 201
+        p = Project.add(s, name=project_name,
+                        effort_estimate=project_effort,
+                        start_date=project_start_date,
+                        due_date=project_due_date)
+        data = p.json()
+        return jsonify(success=True, project=data), 201
 
 
-@app.route('/projects/<int:member_id>', methods=['DELETE'])
-def remove_project(project_id):
+@app.route('/delete_project/<int:project_id>', methods=['DELETE'])
+def delete_project(project_id):
     with Session() as s:
-        Project.remove_by_id(s, project_id)
-
-    return jsonify({'message': 'Project deleted successfully'}), 200
+        try:
+            Project.remove_by_id(s, project_id)
+            return jsonify(success=True), 200
+        except Exception as e:
+            return jsonify(success=False, error="Project not found"), 404
 
 
 @app.route('/skills', methods=['GET'])

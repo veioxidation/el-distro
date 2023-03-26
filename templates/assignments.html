@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Assignments</h1>
+
+<!-- Add assignment form -->
+<form id="add-assignment-form" method="post">
+  <div class="mb-3">
+    <label for="member" class="form-label">Member</label>
+    <select class="form-select" id="member" name="member" required>
+      {% for member in members %}
+      <option value="{{ member.id }}">{{ member.name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="mb-3">
+    <label for="project" class="form-label">Project</label>
+    <select class="form-select" id="project" name="project" required>
+      {% for project in projects %}
+      <option value="{{ project.id }}">{{ project.name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="mb-3">
+    <label for="capacity" class="form-label">Capacity</label>
+    <input type="number" class="form-control" id="capacity" name="capacity" min="0" required>
+  </div>
+  <button type="submit" class="btn btn-primary">Assign Member</button>
+</form>
+
+<!-- Assignments Table -->
+<h2 class="mt-4">Assignments List</h2>
+<table class="table">
+  <thead>
+    <tr>
+      <th scope="col">#</th>
+      <th scope="col">Member</th>
+      <th scope="col">Project</th>
+      <th scope="col">Capacity</th>
+      <th scope="col">Actions</th>
+    </tr>
+  </thead>
+  <tbody id="assignments-tbody">
+    {% for assignment in assignments %}
+    <tr data-assignment-id="{{ assignment.id }}">
+      <th scope="row">{{ loop.index }}</th>
+      <td>{{ assignment.capacity }}</td>
+      <td>{{ assignment.member.name }}</td>
+      <td>{{ assignment.project.name }}</td>
+      <td>
+        <button type="button" class="btn btn-danger" onclick="deleteAssignment({{ assignment.id }})">Delete</button>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
+
+{% block scripts %}
+<!--<script type="module" src="{{ url_for('static', filename='js/assignments.js') }}"></script>-->
+<script src="{{ url_for('static', filename='js/assignments.js') }}"></script>
+{% endblock %}

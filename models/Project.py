@@ -61,3 +61,14 @@ class Project(CoreModel):
     @classmethod
     def query_by_name(cls, s, **kwargs):
         return s.query(cls).filter_by(name=kwargs['name']).first()
+
+    def json(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'effort_estimate': self.effort_estimate,
+            'start_date': self.start_date or "None",
+            'due_date': self.due_date or "None",
+            'status': self.status.name,
+            'progress': self.progress,
+        }

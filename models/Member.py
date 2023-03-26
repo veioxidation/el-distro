@@ -39,3 +39,12 @@ class Member(CoreModel):
     @classmethod
     def query_by_name(cls, s, **kwargs):
         return s.query(cls).filter_by(name=kwargs['name']).first()
+
+    def json(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'capacity': self.capacity,
+            'email': self.email,
+            'skills': [sk.json() for sk in self.skills]
+        }

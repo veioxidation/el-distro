@@ -4,18 +4,17 @@
 
 <div class="toast_container">
     <div class="toast" id="member-added-toast" role="alert" aria-live="assertive" aria-atomic="true" data-delay="3000">
-      <div class="toast-header">
-        <strong class="mr-auto">Member Added</strong>
-        <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="toast-body">
-        Member has been added successfully!
-      </div>
+        <div class="toast-header">
+            <strong class="mr-auto">Member Added</strong>
+            <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <div class="toast-body">
+            Member has been added successfully!
+        </div>
     </div>
 </div>
-
 
 
 <h1>Members</h1>
@@ -28,7 +27,7 @@
     </div>
     <div class="mb-3">
         <label for="name" class="form-label">Email</label>
-        <input type="text" class="form-control" id="email" name="email" required>
+        <input type="email" class="form-control" id="email" name="email" required>
     </div>
     <div class="mb-3">
         <label for="skills" class="form-label">Skills</label>
@@ -60,15 +59,15 @@
     </thead>
     <tbody id="members-tbody">
     {% for member in members %}
-    <tr data-member-id="{{ member.id }}">
-        <th scope="row">{{ member.id }}</th>
-        <td>{{ member.name }}</td>
-        <td>{{ member.capacity }}</td>
-        <td>{{ ', '.join(member.skills|map(attribute='name')) }}</td>
-        <td>
-            <button type="button" class="btn btn-danger" onclick="deleteMember({{ member.id }})">Delete</button>
-        </td>
-    </tr>
+        <tr data-member-id="{{ member.id }}">
+            <th scope="row">{{ loop.index }}</th>
+            <td>{{ member.name }}</td>
+            <td>{{ member.capacity }}</td>
+            <td>{{ ', '.join(member.skills|map(attribute='name')) }}</td>
+            <td>
+                <button type="button" class="btn btn-danger" onclick="deleteMember({{ member.id }})">Delete</button>
+            </td>
+        </tr>
     {% endfor %}
     </tbody>
 </table>

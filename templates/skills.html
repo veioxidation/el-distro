@@ -1,38 +1,55 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h1>Skills</h1>
-
-    <!-- Add member form -->
-    <form action="{{ url_for('add_skill') }}" method="post">
-        <div class="mb-3">
-            <label for="name" class="form-label">Name</label>
-            <input type="text" class="form-control" id="name" name="name" required>
+  <div class="toast_container">
+      <div class="toast" id="skill-added-toast" role="alert" aria-live="assertive" aria-atomic="true" data-delay="3000">
+        <div class="toast-header">
+          <strong class="mr-auto">Member Added</strong>
+          <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
         </div>
-        <button type="submit" class="btn btn-primary">Add Skill</button>
-    </form>
+        <div class="toast-body">
+          Skill has been added successfully!
+        </div>
+      </div>
+  </div>
 
+  <h1>Skills</h1>
 
-    <!-- Skill Table -->
-    <h2 class="mt-4">Skill List</h2>
-    <table class="table">
-        <thead>
-            <tr>
-                <th scope="col">#</th>
-                <th scope="col">Name</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for skill in skills %}
-                <tr>
-                    <th scope="row">{{ loop.index }}</th>
-                    <td>{{ skill.id }}</td>
-                    <td>{{ skill.name }}</td>
-                    <td>
-                        <a href="{{ url_for('delete_skill', skill_id=skill.id) }}" class="btn btn-danger">Delete</a>
-                    </td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+  <!-- Add skill form -->
+  <form id="add-skill-form" method="post">
+    <div class="mb-3">
+      <label for="name" class="form-label">Name</label>
+      <input type="text" class="form-control" id="name" name="name" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Add Skill</button>
+  </form>
+
+  <!-- Skills table -->
+  <h2 class="mt-4">Skills List</h2>
+  <table class="table">
+    <thead>
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Name</th>
+        <th scope="col">Actions</th>
+      </tr>
+    </thead>
+    <tbody id="skills-tbody">
+    {% for skill in skills %}
+      <tr data-skill-id="{{ skill.id }}">
+        <td>{{ loop.index }}</td>
+        <td>{{ skill.name }}</td>
+        <td>
+          <button type="button" class="btn btn-danger" onclick="deleteSkill({{ skill.id }})">Delete</button>
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}
+
+{% block scripts %}
+  <script src="{{ url_for('static', filename='js/skills.js') }}"></script>
 {% endblock %}

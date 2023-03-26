@@ -1,45 +1,45 @@
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOMContentLoaded event fired');
-    document.getElementById('add-member-form').addEventListener('submit', function(event) {
-        console.log('Form submitted');
-        event.preventDefault();
-            event.preventDefault();
+document.getElementById('add-member-form').addEventListener('submit', function(event) {
+    event.preventDefault();
 
-            const formData = new FormData(event.target);
-            fetch('/add_member', {
-                method: 'POST',
-                body: formData,
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Append the new member to the table
-                    const newRow = document.createElement('tr');
-                    newRow.innerHTML = `
-                        <td>${data.member.id}</td>
-                        <td>${data.member.name}</td>
-                        <td>${data.member.capacity}</td>
-                        <td>` + data.member.skills_list.join(', ') + `</td>
-                        <td></td>
-                    `;
-                    document.getElementById('members-tbody').appendChild(newRow);
+    const formData = new FormData(event.target);
+    fetch('/add_member', {
+        method: 'POST',
+        body: formData,
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Append the new member to the table
+            const newRow = document.createElement('tr');
+            newRow.innerHTML = `
+                <td>${data.member.id}</td>
+                <td>${data.member.name}</td>
+                <td>${data.member.capacity}</td>
+                <td>` + data.member.skills_list.join(', ') + `</td>
+                <td></td>
+            `;
+            document.getElementById('members-tbody').appendChild(newRow);
 
-                    // Show the Toast
-                    const toastElement = document.getElementById('member-added-toast');
-                    const toast = new bootstrap.Toast(toastElement);
-                    toast.show();
+            // Show the Toast
+            const toastElement = document.getElementById('member-added-toast');
+            const toast = new bootstrap.Toast(toastElement);
+            toast.show();
 
-                    // Clear the form
-                    event.target.reset();
-                } else {
-                    // Handle errors (e.g., display an error message)
-                    alert('Error adding member: ' + data.error);
-                }
-            });
-
+            // Clear the form
+            event.target.reset();
+        } else {
+            // Handle errors (e.g., display an error message)
+            alert('Error adding member: ' + data.error);
+        }
     });
+
 });
 
+document.getElementById('members-tbody').addEventListener('click', function (event) {
+  if (event.target.classList.contains('btn-delete')) {
+    deleteSkill(event);
+  }
+});
 
 function deleteMember(memberId) {
   fetch('/delete_member/' + memberId, {

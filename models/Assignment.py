@@ -39,3 +39,12 @@ class Assignment(CoreModel):
     def query_by_member_and_project_id(cls, s, project_id, member_id):
         return s.query(cls).filter_by(project_id=project_id,
                                       member_id=member_id).first()
+
+    def json(self):
+        return { 'id': self.id,
+                 'capacity' : self.capacity,
+                 'member_id': self.member_id,
+                 'project_id': self.project_id,
+                 'member': self.member.json(),
+                 'project': self.project.json(),
+        }

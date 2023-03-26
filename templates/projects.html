@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <div class="toast_container">
+      <div class="toast" id="project-added-toast" role="alert" aria-live="assertive" aria-atomic="true" data-delay="3000">
+        <div class="toast-header">
+          <strong class="mr-auto">Member Added</strong>
+          <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="toast-body">
+          Project has been added successfully!
+        </div>
+      </div>
+  </div>
+
+  <h1>Projects</h1>
+
+  <!-- Add project form -->
+  <form id="add-project-form" method="post">
+    <div class="mb-3">
+        <label for="name" class="form-label">Name</label>
+        <input type="text" class="form-control" id="name" name="name" required>
+    </div>
+    <div class="mb-3">
+        <label for="effort_estimate" class="form-label">Effort Estimate</label>
+        <input type="number" class="form-control" id="effort_estimate" name="effort_estimate" min="0" max="10000" required>
+    </div>
+    <div class="form-group date">
+      <label for="start_date">Start date</label>
+      <input type="date" class="form-control" id="start_date" name="start_date" required>
+    </div>
+    <div class="form-group date">
+      <label for="due_date">Due date</label>
+      <input type="date" class="form-control" id="due_date" name="due_date" required>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Add Project</button>
+  </form>
+
+  <!-- Projects table -->
+  <h2 class="mt-4">Projects List</h2>
+  <table class="table">
+    <thead>
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Name</th>
+        <th scope="col">Effort</th>
+        <th scope="col">Start Date</th>
+        <th scope="col">Due Date</th>
+        <th scope="col">Actions</th>
+      </tr>
+    </thead>
+    <tbody id="projects-tbody">
+      {% for project in projects %}
+      <tr data-project-id="{{ project.id }}">
+        <td>{{ loop.index }}</td>
+        <td>{{ project.name }}</td>
+        <td>{{ project.effort_estimate }}</td>
+        <td>{{ project.start_date }}</td>
+        <td>{{ project.due_date }}</td>
+        <td>
+            <button type="button" class="btn btn-danger" onclick="deleteProject({{ project.id }})">Delete</button>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}
+
+{% block scripts %}
+  <script src="{{ url_for('static', filename='js/projects.js') }}"></script>
+{% endblock %}
