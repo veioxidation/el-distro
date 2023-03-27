@@ -1,80 +1,13 @@
 import dash_bootstrap_components as dbc
-import dash_html_components as html
-import pandas as pd
-import plotly.express as px
-from dash import html, Dash
-from dash.dependencies import Input, Output
+from dash import Dash
 
-from app import app
-from dashboard import member_dropdown
+from dashboard.layout import create_layout
 from dashboard.load_data import load_data
 
-dash_app = Dash(__name__, server=app, url_base_pathname='/dashboard/', external_stylesheets=[dbc.themes.BOOTSTRAP])
+# dash_app = Dash(__name__, server=app, url_base_pathname='/dashboard/', external_stylesheets=[dbc.themes.BOOTSTRAP])
+dash_app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
 
-# def create_layout(app: Dash, data: pd.DataFrame) -> html.Div:
-#     return html.Div(
-#         className="app-div",
-#         children=[
-#             html.H1(app.title),
-#             html.Hr(),
-#             html.Div(
-#                 className="dropdown-container",
-#                 children=[
-#                     year_dropdown.render(app, data),
-#                     month_dropdown.render(app, data),
-#                     category_dropdown.render(app, data),
-#                 ],
-#             ),
-#             bar_chart.render(app, data),
-#             pie_chart.render(app, data),
-#         ],
-#     )
-
-
-def create_layout(app: Dash, data: dict):
-    return html.Div(
-        [
-            dbc.Row(
-                [
-                    dbc.Col(html.H3("Team Capacity Dashboard"), className="mb-4 mt-4")
-                ]
-            ),
-            dbc.Row(
-                [
-                    html.Div(
-                        className='dropdown-container',
-                        children=[
-                            member_dropdown.render(app, data)
-                        ]
-                    ),
-
-                    # dbc.Col(
-                    #     [
-                    #         dcc.Graph(id="total-capacity-chart", className="mb-4"),
-                    #     ],
-                    #     width=6,
-                    # ),
-                    # dbc.Col(
-                    #     [
-                    #         dcc.Graph(id="gantt-chart", className="mb-4"),
-                    #     ],
-                    #     width=6,
-                    # ),
-                ]
-            ),
-            # dbc.Row(
-            #     [
-            #         dbc.Col(
-            #             [
-            #                 html.H4("Free Capacity for Today"),
-            #                 html.Table(id="free-capacity-table", className="mb-4"),
-            #             ]
-            #         )
-            #     ]
-            # ),
-        ]
-    )
 
 
 # dash_app.layout = create_layout

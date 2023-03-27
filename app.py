@@ -1,4 +1,8 @@
-from flask import Flask, render_template
+import dash_bootstrap_components as dbc
+from dash import Dash
+from flask import Flask, render_template, redirect
+from werkzeug import run_simple
+from werkzeug.middleware.dispatcher import DispatcherMiddleware
 
 from create_engine import DB_URI
 from routes.assignments import assignments_bp
@@ -26,7 +30,17 @@ app.register_blueprint(assignments_bp)
 def index():
     return render_template('base.html')
 
+@app.route('/dashboard')
+def render_dashboard():
+    return redirect('/dash')
+
+# dash_app = Dash(__name__, server=app, url_base_pathname='/dashboard/', external_stylesheets=[dbc.themes.BOOTSTRAP])
+# dash_app = Dash(__name__, server=app, url_base_pathname='/dashboard', external_stylesheets=[dbc.themes.BOOTSTRAP])
+dash_app = Dash(__name__, server=app, external_stylesheets=[dbc.themes.BOOTSTRAP])
+
 
 if __name__ == '__main__':
     print(app.url_map)
     app.run()
+    # application = DispatcherMiddleware(app, {'/dash': dash_app.server})
+    # run_simple('0.0.0.0', 8080, application, use_reloader=True, use_debugger=True)

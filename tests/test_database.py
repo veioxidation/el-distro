@@ -52,12 +52,10 @@ class TestDatabase(unittest.TestCase):
         self.assertEqual(len(skills), 3)
         Member.remove_by_id(session, member.id)
 
-
-
     def test_project_assignment(self):
         ss1 = Skill.add(session, name='Python')
         ss2 = Skill.add(session, name='AA')
-        m = Member(name='Przemek', capacity=100, skills = [ss1, ss2])
+        m = Member(name='Przemek', capacity=100, skills=[ss1, ss2])
         p = Project(name='Project 1')
         a = Assignment(capacity=100, member_id=m.id, project_id=p.id)
 

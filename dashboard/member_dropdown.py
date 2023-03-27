@@ -20,7 +20,7 @@ def render(app: Dash, data: dict) -> html.Div:
 
     return html.Div(
         children=[
-            html.H6("Year"),
+            html.H6("Member"),
             dcc.Dropdown(
                 id=ids.MEMBER_DROPDOWN,
                 options=[{"label": member, "value": member} for member in members],
